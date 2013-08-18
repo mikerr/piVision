@@ -7,15 +7,14 @@ import subprocess
 import Tkinter as tk
 from PIL import Image,ImageFilter,ImageChops,ImageTk
 
-imagefile = "image.jpg"
+imagefile = "/dev/shm/image.jpg"
 w = 800
 h = 600
 
 def takephoto():
-    command = "raspistill -n -w %s -h %s -t 0 -o image.jpg" % (w, h)
+    command = "raspistill -n -w %s -h %s -t 0 -o %s" % (w, h, imagefile)
     subprocess.check_output(command, shell=True)
     image1 = Image.open(imagefile)
-    # image1 = image1.resize((640,480),Image.NEAREST)
     return image1
 
 def newphoto():
@@ -89,5 +88,15 @@ button = tk.Button(buttonrow, text='EMBOSS',command = lambda: dofilter(image1,Im
 button.pack(side='left')
 button = tk.Button(buttonrow, text='EDGE_ENHANCE',command = lambda: dofilter(image1,ImageFilter.EDGE_ENHANCE))
 button.pack(side='left')
+
+# resize event:
+
+def onResizeWindow(event):
+	global image1
+    	image1 = image1.resize((event.width,event.height),Image.NEAREST)
+	tkimage1 = ImageTk.PhotoImage(image1)
+	panel1.configure(image=tkimage1)
+	panel1.image = tkimage1
+# root.bind( '<Configure>', onResizeWindow )
 
 root.mainloop()
