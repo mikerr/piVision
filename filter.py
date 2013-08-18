@@ -1,11 +1,15 @@
 #!/usr/bin/python
+
+# quick demo of some python image filters
+# using raspberry pi camera
+
 import subprocess
 import Tkinter as tk
-from PIL import Image,ImageFilter, ImageTk
+from PIL import Image,ImageFilter,ImageChops,ImageTk
 
 imagefile = "image.jpg"
-w = 640
-h = 480
+w = 800
+h = 600
 
 def takephoto():
     command = "raspistill -n -w %s -h %s -t 0 -o image.jpg" % (w, h)
@@ -17,15 +21,32 @@ def takephoto():
 def newphoto():
 	global image1
 	image1 =  takephoto()
+
+	tkimage1 = ImageTk.PhotoImage(image1)
+	panel1.configure(image=tkimage1)
+	panel1.image = tkimage1
+
+def invert():
+	global image1
+	image1= ImageChops.invert(image1)
+
+	tkimage1 = ImageTk.PhotoImage(image1)
+	panel1.configure(image=tkimage1)
+	panel1.image = tkimage1
+
+def grayscale():
+	global image1
+	r, g, b = image1.split()
+    	image1 = Image.merge("RGB", (g,g,g))
+
 	tkimage1 = ImageTk.PhotoImage(image1)
 	panel1.configure(image=tkimage1)
 	panel1.image = tkimage1
 
 def dofilter (theimage,thefilter):
 	global image1
-	processed =  image1.filter(thefilter)
-	image1 = processed
-	tkimage1 = ImageTk.PhotoImage(processed)
+	image1 =  image1.filter(thefilter)
+	tkimage1 = ImageTk.PhotoImage(image1)
 	panel1.configure(image=tkimage1)
 	panel1.image = tkimage1
 	
@@ -53,7 +74,9 @@ buttonrow.place(y=0,x=0)
 
 button = tk.Button(buttonrow, text='CAMERA',command = newphoto)
 button.pack(side='left',)
-button = tk.Button(buttonrow, text='INVERT',command = newphoto)
+button = tk.Button(buttonrow, text='INVERT',command = invert)
+button.pack(side='left',)
+button = tk.Button(buttonrow, text='GRAY',command = grayscale)
 button.pack(side='left',)
 # add some filter buttons
 button = tk.Button(buttonrow, text='BLUR',command = lambda: dofilter(image1,ImageFilter.BLUR))
@@ -66,6 +89,5 @@ button = tk.Button(buttonrow, text='EMBOSS',command = lambda: dofilter(image1,Im
 button.pack(side='left')
 button = tk.Button(buttonrow, text='EDGE_ENHANCE',command = lambda: dofilter(image1,ImageFilter.EDGE_ENHANCE))
 button.pack(side='left')
-button = tk.Button(buttonrow, text='INVERT',command = lambda: dofilter(image1,ImageFilter.INVERT))
 
 root.mainloop()
