@@ -22,7 +22,7 @@ threshold = 10
 sensitivity = 180
 forceCapture = True
 forceCaptureTime = 60 * 60 # Once an hour
-filepath = "/home/pi/nasbox/picam"
+filepath = "/home/pi/"
 filenamePrefix = "capture"
 # File photo size settings
 saveWidth = 1280
@@ -31,7 +31,7 @@ diskSpaceToReserve = 40 * 1024 * 1024 # Keep 40 mb free on disk
 
 # Capture a small test image (for motion detection)
 def captureTestImage():
-    command = "raspistill -w %s -h %s -t 0 -e bmp -o -" % (100, 75)
+    command = "raspistill -n -w %s -h %s -t 0 -e bmp -o -" % (100, 75)
     imageData = StringIO.StringIO()
     imageData.write(subprocess.check_output(command, shell=True))
     imageData.seek(0)
@@ -45,7 +45,7 @@ def saveImage(width, height, diskSpaceToReserve):
     keepDiskSpaceFree(diskSpaceToReserve)
     time = datetime.now()
     filename = filepath + "/" + filenamePrefix + "-%04d%02d%02d-%02d%02d%02d.jpg" % ( time.year, time.month, time.day, time.hour, time.minute, time.second)
-    subprocess.call("raspistill -hf -w 1296 -h 972 -t 0 -e jpg -q 15 -o %s" % filename, shell=True)
+    subprocess.call("raspistill -n -hf -w 1296 -h 972 -t 0 -e jpg -q 15 -o %s" % filename, shell=True)
     print "Captured %s" % filename
 
 # Keep free space above given level
