@@ -1,13 +1,12 @@
 #!/usr/bin/python
+
 import os,subprocess,glob,time
 import cv2.cv as cv
 from optparse import OptionParser
 
-    
 cv.NamedWindow("result", 1)
 
-
-command = "raspistill -tl 90 -n -rot 180 -o /run/shm/image%d.jpg -w 640 -h 480 "
+command = "raspistill -tl 65 -n -rot 180 -o /run/shm/image%d.jpg -w 640 -h 480 "
 p=subprocess.Popen(command,shell=True)
 
 # wait until we have at least 2 image files
