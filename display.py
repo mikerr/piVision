@@ -6,7 +6,7 @@ from optparse import OptionParser
 
 cv.NamedWindow("result", 1)
 
-command = "raspistill -tl 65 -n -rot 180 -o /run/shm/image%d.jpg -w 640 -h 480 "
+command = "raspistill -tl 65 -n -rot 180 -o /run/shm/image%d.jpg -w 640 -h 480 -e bmp"
 p=subprocess.Popen(command,shell=True)
 
 # wait until we have at least 2 image files
@@ -36,9 +36,9 @@ if True:
 	    frame=cv.LoadImage(imagefile,cv.CV_LOAD_IMAGE_COLOR)
 
 	    t = cv.GetTickCount()  - t
-            print "capture = %gfps" % (1000 / (t/(cv.GetTickFrequency()*1000.)))
     	    cv.ShowImage("result", frame)
-            if cv.WaitKey(10) >= 0:
+            print "capture = %gfps" % (1000 / (t/(cv.GetTickFrequency()*1000.)))
+            if cv.WaitKey(1) >= 0:
                 break
 
 cv.DestroyWindow("result")
