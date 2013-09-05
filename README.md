@@ -9,7 +9,8 @@ filters.py - GUI demo of basic python image filters:
                blur,contour,find_edges,emboss,edge_enhance
 
              
-facedetect.sh
+facedetect.sh - starter script for  facedetect.py
+
 facedetect.py - face detection using the pi camera
 
                draws a red box around each face detected
