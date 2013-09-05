@@ -1,7 +1,7 @@
 piVision
 ========
 
-Simple python based vision tests
+Python based vision tests
 
 filters.py - GUI demo of basic python image filters:
 
