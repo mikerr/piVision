@@ -86,14 +86,14 @@ if __name__ == '__main__':
     cv.NamedWindow("result", 1)
 
 
-    command = "raspistill -tl 90 -n -rot 180 -o /run/shm/image%d.jpg -w 320 -h 240 "
+    command = "raspistill -tl 100 -n -rot 180 -o /run/shm/image%d.jpg -w 320 -h 240 -e bmp"
     p=subprocess.Popen(command,shell=True)
 
     # wait until we have at least 2 image files
 
     while True:
 	    files = filter(os.path.isfile, glob.glob('/run/shm/' + "image*jpg"))
-	    if files > 1:
+	    if len(files) > 1:
 		break
 	    print "waiting for images"
 	    time.sleep(0.5)
@@ -115,10 +115,11 @@ if __name__ == '__main__':
 		 
 	    frame=cv.LoadImage(imagefile,cv.CV_LOAD_IMAGE_COLOR)
             detected = detect_and_draw(frame, cascade, detected)
-
+	    # uncomment if you want some spare cpu - reduced from 7fps to 5fps
+	    # time.sleep(0.05)
 	    t = cv.GetTickCount()  - t
             print "capture = %gfps" % (1000 / (t/(cv.GetTickFrequency()*1000.)))
-            if cv.WaitKey(10) >= 0:
+            if cv.WaitKey(1) >= 0:
                 break
 
     cv.DestroyWindow("result")
