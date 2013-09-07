@@ -15,6 +15,7 @@ facedetect.py - face detection using the pi camera
 
                draws a red box around each face detected
                (supports muliple faces per frame)
+               currently 8fps
 
 
 display.py - openCV display test
