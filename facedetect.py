@@ -21,15 +21,21 @@ min_size = (5,5)
 haar_scale = 1.2
 min_neighbors = 2
 haar_flags = 0
+
 # detection image width
 smallwidth = 70
 
 def detect_and_draw(img, cascade, detected):
+
     # allocate temporary images
 
     gray = cv.CreateImage((img.width,img.height), 8, 1)
     image_scale = img.width / smallwidth
+
     small_img = cv.CreateImage((cv.Round(img.width / image_scale), cv.Round (img.height / image_scale)), 8, 1)
+    # gray = cv.CreateImage((img.width,img.height), 8, 1)
+    image_scale = img.width / smallwidth
+    # small_img = cv.CreateImage((cv.Round(img.width / image_scale), cv.Round (img.height / image_scale)), 8, 1)
 
     # convert color input image to grayscale
     cv.CvtColor(img, gray, cv.CV_BGR2GRAY)
@@ -40,10 +46,7 @@ def detect_and_draw(img, cascade, detected):
     cv.EqualizeHist(small_img, small_img)
 
     if(cascade):
-        t = cv.GetTickCount()
         faces = cv.HaarDetectObjects(small_img, cascade, cv.CreateMemStorage(0), haar_scale, min_neighbors, haar_flags, min_size)
-        # t = cv.GetTickCount() - t
-        # print "detection time = %gms" % (t/(cv.GetTickFrequency()*1000.))
         if faces:
 	    if detected == 0:
 		# os.system('festival --tts hi &')
@@ -73,6 +76,9 @@ def detect_and_draw(img, cascade, detected):
 			status = "just disappeared"
 		detected = 0
 
+    # fps = int ( (t/(cv.GetTickFrequency()) / 1000))
+    # font = cv.InitFont(cv.CV_FONT_HERSHEY_SIMPLEX,1,1,0,3,8)
+    # cv.PutText(img,"% fps" % fps,(img.width/2,img.height-10), font,255)
     cv.ShowImage("result", img)
     return detected
 
@@ -86,7 +92,9 @@ if __name__ == '__main__':
     cv.NamedWindow("result", 1)
 
 
-    command = "raspistill -tl 100 -n -rot 180 -o /run/shm/image%d.jpg -w 320 -h 240 -e bmp"
+
+    # fps = 1000 / tl
+    command = "raspistill -tl 65 -n -rot 180 -hf -o /run/shm/image%d.jpg -w 320 -h 240 -e bmp"
     p=subprocess.Popen(command,shell=True)
 
     # wait until we have at least 2 image files
@@ -103,22 +111,32 @@ if __name__ == '__main__':
         frame = None
         while True:
         
-	    t = cv.GetTickCount() 
-
+    	    t = cv.GetTickCount() 
+	    # restart raspistill when it exits
 	    if p.poll() is not None:
 			print "restarting raspistill"
     			p=subprocess.Popen(command,shell=True)
+
+	    # list most recent images,
+	    # and get the 2nd most recent image
+	    # since this is the last complete one
 
 	    files = filter(os.path.isfile, glob.glob('/run/shm/' + "image*jpg"))
 	    files.sort(key=lambda x: os.path.getmtime(x))
 	    imagefile = (files[-2])
 		 
+	    print imagefile
 	    frame=cv.LoadImage(imagefile,cv.CV_LOAD_IMAGE_COLOR)
             detected = detect_and_draw(frame, cascade, detected)
+
 	    # uncomment if you want some spare cpu - reduced from 7fps to 5fps
-	    # time.sleep(0.05)
-	    t = cv.GetTickCount()  - t
-            print "capture = %gfps" % (1000 / (t/(cv.GetTickFrequency()*1000.)))
+	    time.sleep(0.1)
+
+    	    t = cv.GetTickCount() - t
+    	    fps = int (1000 / (t/(cv.GetTickFrequency() * 1000)))
+	    print fps
+
+	    #exit when any key pressed
             if cv.WaitKey(1) >= 0:
                 break
 
