@@ -15,7 +15,7 @@ posy=0
 global h,s,v,i,im,evente
 h,s,v,i,r,g,b,j,evente=0,0,0,0,0,0,0,0,0
 
-#	Mouse callback function	(from earlier mouse_callback.py with little modification)
+#	Mouse callback function	
 def my_mouse_callback(event,x,y,flags,param):
 	global evente,h,s,v,i,r,g,b,j
 	evente=event
@@ -28,13 +28,13 @@ def my_mouse_callback(event,x,y,flags,param):
 		print "hsv= ",cv.Get2D(hsv,y,x)		# Gives you HSV at clicked point
 		print "im= ",cv.Get2D(frame,y,x) 	# Gives you RGB at clicked point
 
-#	Thresholding function	(from earlier mouse_callback.py)	
+#	Thresholding function	
 def getthresholdedimg(im):
 	'''This function take RGB image.Then convert it into HSV for easy colour detection and threshold it with the given part as white and all other regions as black.Then return that image'''
 	imghsv=cv.CreateImage(cv.GetSize(im),8,3)
 	cv.CvtColor(im,imghsv,cv.CV_BGR2HSV)
 	imgthreshold=cv.CreateImage(cv.GetSize(im),8,1)
-	cv.InRangeS(imghsv,cv.Scalar(h,100,10),cv.Scalar(h+10,255,255),imgthreshold)
+	cv.InRangeS(imghsv,cv.Scalar(h,100,10),cv.Scalar(h+20,255,255),imgthreshold)
 	return imgthreshold
 
 def getpositions(im):
@@ -82,22 +82,16 @@ files.sort(key=lambda x: os.path.getmtime(x))
 imagefile = (files[-2])
 
 frame=cv.LoadImage(imagefile,cv.CV_LOAD_IMAGE_COLOR)
-test=cv.CreateImage(cv.GetSize(frame),8,3)	# We make all drawings on imdraw.
+test=cv.CreateImage(cv.GetSize(frame),8,3)	
+imdraw=cv.CreateImage(cv.GetSize(frame),8,3)	# We make all drawings on imdraw.
 
 cv.NamedWindow("pick")
 cv.SetMouseCallback("pick",my_mouse_callback)
-while(1):
-	cv.ShowImage("pick",frame)
-	cv.WaitKey(33)
-	if evente==7:	# When double-clicked(i.e. event=7), this window closes and opens next window
-		break
-
 
 cv.NamedWindow("output")
 cv.NamedWindow("threshold")	
 
-print "opened windows"
-time.sleep(1)
+h = 8;
 while(1):
 	if p.poll() is not None:
 			print "restarting raspistill"
@@ -108,11 +102,29 @@ while(1):
 
 	frame=cv.LoadImage(imagefile,cv.CV_LOAD_IMAGE_COLOR)
 
-	imdraw=cv.CreateImage(cv.GetSize(frame),8,3)	# We make all drawings on imdraw.
 
-	#cv.Flip(frame,frame,1)				# Horizontal flipping for synchronization, comment it to see difference.
 	thresh_img=getthresholdedimg(frame)		# We get coordinates from thresh_img
+	
 	cv.Erode(thresh_img,thresh_img,None,1)		# Eroding removes small noises
+	cv.Dilate(thresh_img,thresh_img,None,1)		# Dilate
+
+	cv.ShowImage("threshold",thresh_img)
+	storage = cv.CreateMemStorage(0)
+	contour = cv.FindContours(thresh_img, storage, cv.CV_RETR_CCOMP, cv.CV_CHAIN_APPROX_NONE)
+	points = []	
+
+	while contour:
+		# Draw bounding rectangles
+		bound_rect = cv.BoundingRect(list(contour))
+
+		if (cv.ContourArea(contour) > 300):
+			pt1 = (bound_rect[0], bound_rect[1])
+			pt2 = (bound_rect[0] + bound_rect[2], bound_rect[1] + bound_rect[3])
+			points.append(pt1)
+			points.append(pt2)
+			cv.Rectangle(frame, pt1, pt2, cv.CV_RGB(255,0,0), 1)
+		contour = contour.h_next()
+
 	(leftmost,rightmost,topmost,bottommost)=getpositions(thresh_img)
 	if (leftmost-rightmost!=0) or (topmost-bottommost!=0):
 		lastx=posx
@@ -121,14 +133,17 @@ while(1):
 		posy=cv.Round((bottommost+topmost)/2)
 		if lastx!=0 and lasty!=0:
 			cv.Line(imdraw,(posx,posy),(lastx,lasty),(b,g,r))
-		cv.Circle(imdraw,(posx,posy),5,(b,g,r),-1)
+			cv.Circle(imdraw,(posx,posy),5,(b,g,r),-1)
 
-	cv.Add(test,imdraw,test)			# Adding imdraw on test keeps all lines there on the test frame. If not, we don't get full drawing, instead we get only that fraction of line at the moment.
+	cv.Add(test,imdraw,test)	# Adding imdraw on test keeps all lines there on the test frame. If not, we don't get full drawing, instead we get only that fraction of line at the moment.
 
     	cv.ShowImage("pick", frame)
 	cv.ShowImage("output",test)
-	cv.ShowImage("threshold",thresh_img)
+
 	if cv.WaitKey(100)>= 0:
 		break
+	if evente == cv.CV_EVENT_LBUTTONDBLCLK:
+		print "double click"
+		cv.Set(test, cv.CV_RGB(0,0,0));
 p.kill()
 
