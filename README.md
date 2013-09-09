@@ -11,7 +11,10 @@ filters.py - GUI demo of basic python image filters:
              
 facedetect.sh - starter script for  facedetect.py
 
+
 facedetect.py - face detection using the pi camera
+<a href="https://www.youtube.com/watch?v=opUfKthZJ00">
+<img src=http://i1.ytimg.com/vi/opUfKthZJ00/1.jpg?time=1377977636623 align=right></a>
 
                draws a red box around each face detected
                (supports muliple faces per frame)
