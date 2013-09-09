@@ -1,7 +1,7 @@
 piVision
 ========
 
-Python based vision tests - face / object detion and tracking
+Python based vision tests - face / object detection and tracking
 
 filters.py - GUI demo of basic python image filters:
 
@@ -20,7 +20,12 @@ facedetect.py - face detection using the pi camera
                (supports muliple faces per frame)
                currently 8fps
 
+colortrack.py - tracking by colour
 
+               blob object tracking based on colour range
+               double click object in main window to select colour
+               
+               
 display.py - openCV display test
 
              repeatedly loads frames from the pi camera to test frame rate
