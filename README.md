@@ -21,6 +21,8 @@ facedetect.py - face detection using the pi camera
                currently 8fps
 
 colortrack.py - tracking by colour
+<a href=https://www.youtube.com/watch?v=S8ypPX0R9HE>
+<img src=http://imageshack.us/scaled/thumb/203/02vr.png align=right>
 
                blob object tracking based on colour range
                double click object in main window to select colour
