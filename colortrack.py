@@ -7,7 +7,8 @@ then track any blobs with that colour
 """
 
 import os,subprocess,glob,time
-import cv2.cv as cv
+#import cv2.cv as cv
+import cv
 
 posx=0
 posy=0
@@ -81,6 +82,7 @@ files.sort(key=lambda x: os.path.getmtime(x))
 imagefile = (files[-2])
 
 frame=cv.LoadImage(imagefile,cv.CV_LOAD_IMAGE_COLOR)
+test=cv.CreateImage(cv.GetSize(frame),8,3)	# We make all drawings on imdraw.
 
 cv.NamedWindow("pick")
 cv.SetMouseCallback("pick",my_mouse_callback)
@@ -106,8 +108,7 @@ while(1):
 
 	frame=cv.LoadImage(imagefile,cv.CV_LOAD_IMAGE_COLOR)
 
-	test=cv.CreateImage(cv.GetSize(frame),8,1)	# We make all drawings on imdraw.
-	imdraw=cv.CreateImage(cv.GetSize(frame),8,1)	# We make all drawings on imdraw.
+	imdraw=cv.CreateImage(cv.GetSize(frame),8,3)	# We make all drawings on imdraw.
 
 	#cv.Flip(frame,frame,1)				# Horizontal flipping for synchronization, comment it to see difference.
 	thresh_img=getthresholdedimg(frame)		# We get coordinates from thresh_img
@@ -122,12 +123,11 @@ while(1):
 			cv.Line(imdraw,(posx,posy),(lastx,lasty),(b,g,r))
 		cv.Circle(imdraw,(posx,posy),5,(b,g,r),-1)
 
-	#cv.Add(test,imdraw,test)			# Adding imdraw on test keeps all lines there on the test frame. If not, we don't get full drawing, instead we get only that fraction of line at the moment.
+	cv.Add(test,imdraw,test)			# Adding imdraw on test keeps all lines there on the test frame. If not, we don't get full drawing, instead we get only that fraction of line at the moment.
 
     	cv.ShowImage("pick", frame)
-	cv.ShowImage("output",imdraw)
+	cv.ShowImage("output",test)
 	cv.ShowImage("threshold",thresh_img)
-
 	if cv.WaitKey(100)>= 0:
 		break
 p.kill()
