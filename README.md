@@ -20,7 +20,10 @@ facedetect.py - face detection using the pi camera
                (supports muliple faces per frame)
                currently 8fps
 
+colortrack.py - object tracking based on colour range
 
+               double click object in main window to select colour
+               
 display.py - openCV display test
 
              repeatedly loads frames from the pi camera to test frame rate
