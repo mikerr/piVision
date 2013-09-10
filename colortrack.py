@@ -62,7 +62,7 @@ def getpositions(im):
 
 # get a frame
 
-command = "raspistill -tl 65 -n -rot 180 -hf -o /run/shm/image%d.jpg -w 320 -h 240 -e bmp"
+command = "raspistill -tl 65 -n -rot 180 -hf -o /run/shm/image%d.jpg -w 320 -h 240 -e bmp >/dev/null"
 p=subprocess.Popen(command,shell = True)
 
 # wait until we have at least 2 image files
@@ -72,7 +72,7 @@ for timeout in range (5):
 	    if len(files) > 1:
 		break
 	    print "waiting for images"
-	    time.sleep(1)
+	    time.sleep(5)
 if ( not len (files) > 1):
 	    print "No images"
 	    exit (1)
@@ -97,9 +97,9 @@ pandir = 0
 
 while(1):
 	if p.poll() is not None:
-			exit (0)
-			#print "restarting raspistill"
-    			# p=subprocess.Popen(command,shell=True)
+			#exit (0)
+			print "restarting raspistill"
+    			p=subprocess.Popen(command,shell=True)
 	files = filter(os.path.isfile, glob.glob('/run/shm/' + "image*jpg"))
 	files.sort(key=lambda x: os.path.getmtime(x))
 	imagefile = (files[-2])
@@ -121,7 +121,8 @@ while(1):
 		# Draw bounding rectangles
 		bound_rect = cv.BoundingRect(list(contour))
 
-		if (cv.ContourArea(contour) > 300):
+		
+		if (cv.ContourArea(contour) > 100):
 			pt1 = (bound_rect[0], bound_rect[1])
 			pt2 = (bound_rect[0] + bound_rect[2], bound_rect[1] + bound_rect[3])
 			points.append(pt1)
@@ -136,7 +137,7 @@ while(1):
 
 			offset = abs(mid)
 			if  offset > 20:
-				pandir= mid / offset
+				pandir= (mid / offset)
 			else: 
 				pandir=0
 		contour = contour.h_next()
@@ -156,7 +157,7 @@ while(1):
     	cv.ShowImage("pick", frame)
 	cv.ShowImage("output",test)
 
-	pan = pan + pandir
+	pan = int (pan + pandir)
 	if pan > 180: 
 		pan = 180
 	if pan < 0: 
