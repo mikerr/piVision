@@ -18,7 +18,7 @@ from optparse import OptionParser
 # min_size=<minimum possible face size
 
 min_size = (5,5)
-haar_scale = 1.5
+haar_scale = 1.2
 min_neighbors = 2
 haar_flags = 0
 
@@ -124,6 +124,8 @@ if __name__ == '__main__':
 	#usb cam
 	capture = cv.CaptureFromCAM(0)
 	frame = cv.QueryFrame(capture)
+	cv.SetCaptureProperty( capture, cv.CV_CAP_PROP_FRAME_WIDTH, 320 )
+	cv.SetCaptureProperty( capture, cv.CV_CAP_PROP_FRAME_HEIGHT, 240 )
 
     if True:
 	detected = 0

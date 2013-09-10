@@ -88,6 +88,9 @@ else:
 	#usb cam
 
 	capture=cv.CaptureFromCAM(0)
+	cv.SetCaptureProperty(capture, cv.CV_CAP_PROP_FRAME_WIDTH, 320 );
+	cv.SetCaptureProperty(capture, cv.CV_CAP_PROP_FRAME_HEIGHT, 240 );
+
 	frame=cv.QueryFrame(capture)
 
 test=cv.CreateImage(cv.GetSize(frame),8,3)	
