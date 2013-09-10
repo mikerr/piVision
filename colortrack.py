@@ -91,11 +91,15 @@ cv.SetMouseCallback("pick",my_mouse_callback)
 cv.NamedWindow("output")
 cv.NamedWindow("threshold")	
 
-h = 8;
+h = 8; # orange
+pan = 100
+pandir = 0
+
 while(1):
 	if p.poll() is not None:
-			print "restarting raspistill"
-    			p=subprocess.Popen(command,shell=True)
+			exit (0)
+			#print "restarting raspistill"
+    			# p=subprocess.Popen(command,shell=True)
 	files = filter(os.path.isfile, glob.glob('/run/shm/' + "image*jpg"))
 	files.sort(key=lambda x: os.path.getmtime(x))
 	imagefile = (files[-2])
@@ -123,6 +127,18 @@ while(1):
 			points.append(pt1)
 			points.append(pt2)
 			cv.Rectangle(frame, pt1, pt2, cv.CV_RGB(255,0,0), 1)
+
+			obj_mid = bound_rect[0] + ( bound_rect[2] /2 )
+			frame_mid = frame.width / 2
+			mid =  frame_mid - obj_mid
+
+			# only move if not near middle
+
+			offset = abs(mid)
+			if  offset > 20:
+				pandir= mid / offset
+			else: 
+				pandir=0
 		contour = contour.h_next()
 
 	(leftmost,rightmost,topmost,bottommost)=getpositions(thresh_img)
@@ -140,10 +156,17 @@ while(1):
     	cv.ShowImage("pick", frame)
 	cv.ShowImage("output",test)
 
-	if cv.WaitKey(100)>= 0:
+	pan = pan + pandir
+	if pan > 180: 
+		pan = 180
+	if pan < 0: 
+		pan = 0
+
+	os.system('echo "0="' + str(pan) + ' >/dev/servoblaster')
+
+	if cv.WaitKey(10)>= 0:
 		break
 	if evente == cv.CV_EVENT_LBUTTONDBLCLK:
 		print "double click"
 		cv.Set(test, cv.CV_RGB(0,0,0));
-p.kill()
 

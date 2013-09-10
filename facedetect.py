@@ -66,9 +66,8 @@ def detect_and_draw(img, cascade, detected):
 			 print "left", mid -span
 		else:
 			 print "right", span - mid
-
-		#os.system('echo "6="' + str(valTilt) + ' > /dev/pi-blaster')
-		#os.system('echo "7="' + str(valPan) + ' > /dev/pi-blaster')
+		valPan = 100 + ((mid -span)/ 1)
+		os.system('echo "0="' + str(valPan) + ' > /dev/servoblaster')
 	else:
 		if detected == 1:
 			#print "Last seen at: ", pt1[0], ",", pt2[0], "\t", pt1[1], ",", pt2[1]
@@ -125,7 +124,7 @@ if __name__ == '__main__':
 	    files.sort(key=lambda x: os.path.getmtime(x))
 	    imagefile = (files[-2])
 		 
-	    print imagefile
+	    # print imagefile
 	    frame=cv.LoadImage(imagefile,cv.CV_LOAD_IMAGE_COLOR)
             detected = detect_and_draw(frame, cascade, detected)
 
@@ -134,7 +133,7 @@ if __name__ == '__main__':
 
     	    t = cv.GetTickCount() - t
     	    fps = int (1000 / (t/(cv.GetTickFrequency() * 1000)))
-	    print fps
+	    # print fps
 
 	    #exit when any key pressed
             if cv.WaitKey(1) >= 0:
