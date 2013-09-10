@@ -1,7 +1,7 @@
 piVision
 ========
 
-Python based vision tests - face / object detection and tracking
+Python based vision tests - face / object detection and tracking with  pi cam
 
 filters.py - GUI demo of basic python image filters:
 
