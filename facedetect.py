@@ -24,8 +24,11 @@ haar_flags = 0
 
 # detection image width
 smallwidth = 70
+pan =100
 
 def detect_and_draw(img, cascade, detected):
+
+    global pan
 
     # allocate temporary images
 
@@ -62,12 +65,19 @@ def detect_and_draw(img, cascade, detected):
 		span = (pt1[0] + pt2[0]) / 2
 		stlt = (pt1[1] + pt2[1]) / 2
 		mid = smallwidth /2
+		
 		if span < mid:
 			 print "left", mid -span
+			 pandir = 1
 		else:
 			 print "right", span - mid
-		valPan = 100 + ((mid -span)/ 1)
-		os.system('echo "0="' + str(valPan) + ' > /dev/servoblaster')
+			 pandir = -1
+		pan = pan + pandir
+		if pan > 180: 
+			pan = 180
+		if pan < 0: 
+			pan = 0
+		os.system('echo "0="' + str(pan) + ' > /dev/servoblaster')
 	else:
 		if detected == 1:
 			#print "Last seen at: ", pt1[0], ",", pt2[0], "\t", pt1[1], ",", pt2[1]

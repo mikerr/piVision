@@ -122,7 +122,7 @@ while(1):
 		bound_rect = cv.BoundingRect(list(contour))
 
 		
-		if (cv.ContourArea(contour) > 100):
+		if (cv.ContourArea(contour) > 200):
 			pt1 = (bound_rect[0], bound_rect[1])
 			pt2 = (bound_rect[0] + bound_rect[2], bound_rect[1] + bound_rect[3])
 			points.append(pt1)
