@@ -60,28 +60,36 @@ def getpositions(im):
 				temp=2	
 	return (leftmost,rightmost,topmost,bottommost)
 
-# get a frame
+raspicam = 0 
+if raspicam:
+	
+	command = "raspistill -tl 65 -n -rot 180 -hf -o /run/shm/image%d.jpg -w 320 -h 240 -e bmp >/dev/null"
+	p=subprocess.Popen(command,shell = True)
 
-command = "raspistill -tl 65 -n -rot 180 -hf -o /run/shm/image%d.jpg -w 320 -h 240 -e bmp >/dev/null"
-p=subprocess.Popen(command,shell = True)
+	# wait until we have at least 2 image files
 
-# wait until we have at least 2 image files
-
-for timeout in range (5):
+	for timeout in range (5):
 	    files = filter(os.path.isfile, glob.glob('/run/shm/' + "image*.jpg"))
 	    if len(files) > 1:
 		break
 	    print "waiting for images"
 	    time.sleep(5)
-if ( not len (files) > 1):
+	if ( not len (files) > 1):
 	    print "No images"
 	    exit (1)
 
-# get (last-1) recent image
-files.sort(key=lambda x: os.path.getmtime(x))
-imagefile = (files[-2])
+	# get (last-1) recent image
+	files.sort(key=lambda x: os.path.getmtime(x))
+	imagefile = (files[-2])
 
-frame=cv.LoadImage(imagefile,cv.CV_LOAD_IMAGE_COLOR)
+	frame=cv.LoadImage(imagefile,cv.CV_LOAD_IMAGE_COLOR)
+
+else:
+	#usb cam
+
+	capture=cv.CaptureFromCAM(0)
+	frame=cv.QueryFrame(capture)
+
 test=cv.CreateImage(cv.GetSize(frame),8,3)	
 imdraw=cv.CreateImage(cv.GetSize(frame),8,3)	# We make all drawings on imdraw.
 
@@ -96,16 +104,20 @@ pan = 100
 pandir = 0
 
 while(1):
-	if p.poll() is not None:
+
+	if raspicam:
+		if p.poll() is not None:
 			#exit (0)
 			print "restarting raspistill"
     			p=subprocess.Popen(command,shell=True)
-	files = filter(os.path.isfile, glob.glob('/run/shm/' + "image*jpg"))
-	files.sort(key=lambda x: os.path.getmtime(x))
-	imagefile = (files[-2])
+		files = filter(os.path.isfile, glob.glob('/run/shm/' + "image*jpg"))
+		files.sort(key=lambda x: os.path.getmtime(x))
+		imagefile = (files[-2])
 
-	frame=cv.LoadImage(imagefile,cv.CV_LOAD_IMAGE_COLOR)
-
+		frame=cv.LoadImage(imagefile,cv.CV_LOAD_IMAGE_COLOR)
+	else:
+		#usb cam
+		frame=cv.QueryFrame(capture)
 
 	thresh_img=getthresholdedimg(frame)		# We get coordinates from thresh_img
 	
