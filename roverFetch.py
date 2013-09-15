@@ -60,7 +60,7 @@ def getpositions(im):
 				temp=2	
 	return (leftmost,rightmost,topmost,bottommost)
 
-raspicam = 0 
+raspicam = 1 
 if raspicam:
 	
 	command = "raspistill -tl 65 -n -rot 180 -hf -o /run/shm/image%d.jpg -w 320 -h 240 -e bmp >/dev/null"
@@ -96,16 +96,17 @@ else:
 test=cv.CreateImage(cv.GetSize(frame),8,3)	
 imdraw=cv.CreateImage(cv.GetSize(frame),8,3)	# We make all drawings on imdraw.
 
-cv.NamedWindow("pick")
-cv.SetMouseCallback("pick",my_mouse_callback)
+# cv.NamedWindow("pick")
+# cv.SetMouseCallback("pick",my_mouse_callback)
 
-cv.NamedWindow("output")
-cv.NamedWindow("threshold")	
+# cv.NamedWindow("output")
+# cv.NamedWindow("threshold")	
 
-h = 8; # orange
+h = 9; # orange
 pan = 100
 pandir = 0
 
+print "started"
 while(1):
 
 	if raspicam:
@@ -127,7 +128,7 @@ while(1):
 	cv.Erode(thresh_img,thresh_img,None,1)		# Eroding removes small noises
 	cv.Dilate(thresh_img,thresh_img,None,1)		# Dilate
 
-	cv.ShowImage("threshold",thresh_img)
+	# cv.ShowImage("threshold",thresh_img)
 	storage = cv.CreateMemStorage(0)
 	contour = cv.FindContours(thresh_img, storage, cv.CV_RETR_CCOMP, cv.CV_CHAIN_APPROX_NONE)
 	points = []	
@@ -169,8 +170,8 @@ while(1):
 
 	cv.Add(test,imdraw,test)	# Adding imdraw on test keeps all lines there on the test frame. If not, we don't get full drawing, instead we get only that fraction of line at the moment.
 
-    	cv.ShowImage("pick", frame)
-	cv.ShowImage("output",test)
+    # 	cv.ShowImage("pick", frame)
+    # 	cv.ShowImage("output",test)
 
 	pan = int (pan + pandir)
 	if pan > 180: 
@@ -178,8 +179,14 @@ while(1):
 	if pan < 0: 
 		pan = 0
 
-	os.system('echo "0="' + str(pan) + ' >/dev/servoblaster')
-
+	if (pandir):
+		os.system('echo "0=180" >/dev/servoblaster')
+		os.system('echo "7=100" >/dev/servoblaster')
+	else:
+		os.system('echo "0=0" >/dev/servoblaster')
+		os.system('echo "7=0" >/dev/servoblaster')
+		
+        pandir = 0;
 	if cv.WaitKey(1)>= 0:
 		break
 	if evente == cv.CV_EVENT_LBUTTONDBLCLK:
