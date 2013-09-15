@@ -1,8 +1,8 @@
 #!/usr/bin/python
 """
-colortrack.py - track object by its colour
+colortrack.py - track object by it's colour
 
-ifirst double lcik on selected colour,
+first double click on selected colour,
 then track any blobs with that colour
 """
 
