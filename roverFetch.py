@@ -63,7 +63,7 @@ def getpositions(im):
 raspicam = 1 
 if raspicam:
 	
-	command = "raspistill -tl 65 -n -rot 180 -hf -o /run/shm/image%d.jpg -w 320 -h 240 -e bmp >/dev/null"
+	command = "raspistill -tl 65 -n -hf -o /run/shm/image%d.jpg -w 320 -h 240 -e bmp >/dev/null"
 	p=subprocess.Popen(command,shell = True)
 
 	# wait until we have at least 2 image files
@@ -95,25 +95,31 @@ else:
 
 test=cv.CreateImage(cv.GetSize(frame),8,3)	
 imdraw=cv.CreateImage(cv.GetSize(frame),8,3)	# We make all drawings on imdraw.
+gui = 0
+if (gui):
+	cv.NamedWindow("pick")
+ 	cv.SetMouseCallback("pick",my_mouse_callback)
 
-# cv.NamedWindow("pick")
-# cv.SetMouseCallback("pick",my_mouse_callback)
+ 	cv.NamedWindow("output")
+ 	cv.NamedWindow("threshold")	
 
-# cv.NamedWindow("output")
-# cv.NamedWindow("threshold")	
-
-h = 9; # orange
+h = 2 # orange ball
 pan = 100
 pandir = 0
+detected = 0
 
 print "started"
 while(1):
 
 	if raspicam:
 		if p.poll() is not None:
-			#exit (0)
 			print "restarting raspistill"
-    			p=subprocess.Popen(command,shell=True)
+    			#p=subprocess.Popen(command,shell=True)
+			os.system('rm /run/shm/image*')
+			os.system('echo "0=0" >/dev/servoblaster')
+			os.system('echo "7=0" >/dev/servoblaster')
+			exit (0)
+
 		files = filter(os.path.isfile, glob.glob('/run/shm/' + "image*jpg"))
 		files.sort(key=lambda x: os.path.getmtime(x))
 		imagefile = (files[-2])
@@ -128,7 +134,8 @@ while(1):
 	cv.Erode(thresh_img,thresh_img,None,1)		# Eroding removes small noises
 	cv.Dilate(thresh_img,thresh_img,None,1)		# Dilate
 
-	# cv.ShowImage("threshold",thresh_img)
+	if (gui):
+		 cv.ShowImage("threshold",thresh_img)
 	storage = cv.CreateMemStorage(0)
 	contour = cv.FindContours(thresh_img, storage, cv.CV_RETR_CCOMP, cv.CV_CHAIN_APPROX_NONE)
 	points = []	
@@ -138,7 +145,7 @@ while(1):
 		bound_rect = cv.BoundingRect(list(contour))
 
 		
-		if (cv.ContourArea(contour) > 200):
+		if (cv.ContourArea(contour) > 300):
 			pt1 = (bound_rect[0], bound_rect[1])
 			pt2 = (bound_rect[0] + bound_rect[2], bound_rect[1] + bound_rect[3])
 			points.append(pt1)
@@ -152,8 +159,8 @@ while(1):
 			# only move if not near middle
 
 			offset = abs(mid)
-			if  offset > 20:
-				pandir= (mid / offset)
+			if  offset > 0:
+				pandir = (mid / offset)
 			else: 
 				pandir=0
 		contour = contour.h_next()
@@ -170,8 +177,9 @@ while(1):
 
 	cv.Add(test,imdraw,test)	# Adding imdraw on test keeps all lines there on the test frame. If not, we don't get full drawing, instead we get only that fraction of line at the moment.
 
-    # 	cv.ShowImage("pick", frame)
-    # 	cv.ShowImage("output",test)
+	if (gui):
+    	 	cv.ShowImage("pick", frame)
+    	 	cv.ShowImage("output",test)
 
 	pan = int (pan + pandir)
 	if pan > 180: 
@@ -179,17 +187,31 @@ while(1):
 	if pan < 0: 
 		pan = 0
 
-	if (pandir):
-		os.system('echo "0=180" >/dev/servoblaster')
+	if (pandir == 1):
+		print "left"
+		os.system('echo "0=100" >/dev/servoblaster')
 		os.system('echo "7=100" >/dev/servoblaster')
-	else:
-		os.system('echo "0=0" >/dev/servoblaster')
-		os.system('echo "7=0" >/dev/servoblaster')
+		time.sleep(0.05)
+		os.system('echo "0=100" >/dev/servoblaster')
+		os.system('echo "7=180" >/dev/servoblaster')
+		time.sleep(0.5)
+	if (pandir == -1):
+		print "right"
+		os.system('echo "0=180" >/dev/servoblaster')
+		os.system('echo "7=180" >/dev/servoblaster')
+		time.sleep(0.05)
+		os.system('echo "0=100" >/dev/servoblaster')
+		os.system('echo "7=180" >/dev/servoblaster')
+		time.sleep(0.5)
+
+	os.system('echo "0=180" >/dev/servoblaster')
+	os.system('echo "7=100" >/dev/servoblaster')
 		
         pandir = 0;
-	if cv.WaitKey(1)>= 0:
-		break
-	if evente == cv.CV_EVENT_LBUTTONDBLCLK:
-		print "double click"
-		cv.Set(test, cv.CV_RGB(0,0,0));
+	if (gui):
+		 if cv.WaitKey(1)>= 0:
+		 	break
+		 if evente == cv.CV_EVENT_LBUTTONDBLCLK:
+			print "double click"
+			cv.Set(test, cv.CV_RGB(0,0,0));
 

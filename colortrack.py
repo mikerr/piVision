@@ -60,7 +60,7 @@ def getpositions(im):
 				temp=2	
 	return (leftmost,rightmost,topmost,bottommost)
 
-raspicam = 0 
+raspicam = 1 
 if raspicam:
 	
 	command = "raspistill -tl 65 -n -rot 180 -hf -o /run/shm/image%d.jpg -w 320 -h 240 -e bmp >/dev/null"
