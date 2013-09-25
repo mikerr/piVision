@@ -1,6 +1,6 @@
 /* Compile with
 
-   g++-4.7 -std=c++11 -lopencv_core -lopencv_highgui 
+   gcc -std=c++0 -lopencv_core -lopencv_highgui 
    -L/usr/lib/uv4l/uv4lext/armv6l -luv4lext -Wl,-rpath,'/usr/lib/uv4l/uv4lext/armv6l' 
    test.cpp -o test 
 */
